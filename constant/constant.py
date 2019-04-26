@@ -41,14 +41,14 @@ A_ITER = 10
 C_ITER = 10
 
 
-
 dim_image_feature = 4096
+
 
 dim_color_hist = 256*3
 dim_gray_hist = 256
 
 
-TERMINAL_THRESHOLD = 1000
+TERMINAL_THRESHOLD = 800
 
 EP_MAX = 1000000
 
