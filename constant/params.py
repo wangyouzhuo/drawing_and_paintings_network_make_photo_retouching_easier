@@ -12,4 +12,4 @@ LR_C = 0.0001
 dim_master_action = len(master_action_list)
 dim_sub_action = len(sub_action_list)
 
-DEVICE = '/cpu:0'
+DEVICE = '/gpu:0'
