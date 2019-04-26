@@ -73,7 +73,7 @@ def train(sess,BATCH_SIZE=20):
                     print("Epi:%6s || Success:%5s || Steps:%3s || ep_r:%6s || Img::%8s"%(EP_COUNT,done,steps,round(ep_r,3),env.img_name))
                     ep_reward_list.append(ep_r)
                     if done is False:
-                        env.save_env_image(success=False)
+                        env.save_env_image(success=False,epi=EP_COUNT)
                     break
             # update sub_ppo
             a, _ = sub_ppo.choose_action(s_feature=s_color_feature,s_image=s_image)
@@ -113,7 +113,9 @@ def train(sess,BATCH_SIZE=20):
                 EP_COUNT, done, steps, round(ep_r, 3), env.img_name))
                 ep_reward_list.append(ep_r)
                 if done is False:
-                    env.save_env_image(success=False)
+                    env.save_env_image(success=False,epi=EP_COUNT)
+                elif done is True:
+                    env.save_env_image(success=True,epi=EP_COUNT)
                 break
 
 
