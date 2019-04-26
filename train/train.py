@@ -2,7 +2,7 @@ import tensorflow as tf
 from train.model import PPO_Net
 from constant.constant import *
 from constant.params import *
-from env.env import *
+from environment.env import *
 
 def train(sess,BATCH_SIZE=20):
 
