@@ -1,9 +1,9 @@
 
 root = '/home/wyz/PycharmProjects/drawing_and_paintings_network_make_photo_retouching_easier/'
 
-dirty_data_path  = root + '/data/source_data/'
+dirty_data_path  = root + '/data/train_data/'
 
-target_data_path = root + '/data/train_data/'
+target_data_path = root + '/data/source_data/'
 
 result_save_path = root +'/data/result_image/'
 
