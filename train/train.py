@@ -20,7 +20,7 @@ def train(sess,BATCH_SIZE=20):
 
     sess.run(tf.global_variables_initializer())
 
-    env = Environment(source_path=dirty_data_path,target_path=target_data_path)
+    env = Environment(dirty_path=dirty_data_path,target_path=target_data_path)
 
     ep_reward_list = []
 
