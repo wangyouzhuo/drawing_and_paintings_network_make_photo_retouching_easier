@@ -32,6 +32,8 @@ yellow= {'h_low': 22 ,'h_up':38  }
 orange= {'h_low': 0  ,'h_up':22  }
 
 VGG_PATH = '/home/wyz/PycharmProjects/VGG_PARAMS/vgg16.npy'
+# VGG_PATH = root + '/data/vgg_params/vgg16.py'
+
 
 R_MEAN = 128.0
 G_MEAN = 128.0
@@ -48,11 +50,11 @@ dim_color_hist = 256*3
 dim_gray_hist = 256
 
 
-TERMINAL_THRESHOLD = 800
+TERMINAL_THRESHOLD = 350
 
 EP_MAX = 1000000
 
-MAX_STEPS_IN_EPISODE = 400
+MAX_STEPS_IN_EPISODE = 600
 
 
 

@@ -12,11 +12,15 @@ def train(sess,BATCH_SIZE=20):
 
     with tf.device(DEVICE):
 
-        master_ppo = PPO_Net(name='Master_PPO', sess=sess,dim_global_feature=dim_gray_hist,dim_image_feature=dim_image_feature,
-                a_dim=dim_master_action,LR_A=LR_A, LR_C=LR_C,adaptive_dict=adaptive_dict, THRESHOLD=2,device=DEVICE)
+        master_ppo = PPO_Net(name='Master_PPO', sess=sess,dim_global_feature=dim_gray_hist,
+                             dim_image_feature=dim_image_feature,a_dim=dim_master_action,
+                             LR_A=LR_A, LR_C=LR_C,adaptive_dict=adaptive_dict,
+                             THRESHOLD=2,device=DEVICE)
 
-        sub_ppo    = PPO_Net(name='Sub_PPO', sess=sess,dim_global_feature=dim_color_hist,dim_image_feature=dim_image_feature,
-                a_dim=dim_sub_action,LR_A=LR_A, LR_C=LR_C,adaptive_dict=adaptive_dict, THRESHOLD=2,device=DEVICE)
+        sub_ppo    = PPO_Net(name='Sub_PPO', sess=sess,dim_global_feature=dim_color_hist,
+                             dim_image_feature=dim_image_feature,a_dim=dim_sub_action,
+                             LR_A=LR_A, LR_C=LR_C,adaptive_dict=adaptive_dict,
+                             THRESHOLD=2,device=DEVICE)
 
     sess.run(tf.global_variables_initializer())
 
@@ -74,6 +78,8 @@ def train(sess,BATCH_SIZE=20):
                     ep_reward_list.append(ep_r)
                     if done is False:
                         env.save_env_image(success=False,epi=EP_COUNT)
+                    elif done is True:
+                        env.save_env_image(success=True,epi=EP_COUNT)
                     break
             # update sub_ppo
             a, _ = sub_ppo.choose_action(s_feature=s_color_feature,s_image=s_image)
