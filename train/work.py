@@ -11,7 +11,7 @@ class AC_Worker(object):
 
     def __init__(self,name,master_global,sub_global,sess,device,
                  LR_A,LR_C,dim_color_feature,dim_black_feature,
-                 dim_vgg_feature,master_a_dim,sub_a_dim,coord):
+                 dim_vgg_feature,master_a_dim,sub_a_dim,coord,vgg):
 
         self.coord = coord
 
@@ -24,7 +24,8 @@ class AC_Worker(object):
                                    dim_vgg_feature=dim_vgg_feature,
                                    a_dim=master_a_dim,
                                    LR_A=LR_A,LR_C=LR_C,devcie=device,
-                                   global_AC=master_global)
+                                   global_AC=master_global,
+                                   vgg = vgg)
 
         self.Sub_Net    = A3C_Net(type='local',name='Sub_local_'+name,sess=sess,
                                   dim_color_feature=dim_color_feature,
@@ -33,7 +34,8 @@ class AC_Worker(object):
                                   LR_A=LR_A,
                                   LR_C=LR_C,
                                   devcie=device,
-                                  global_AC=sub_global)
+                                  global_AC=sub_global,
+                                  vgg = vgg)
 
     def work(self):
 

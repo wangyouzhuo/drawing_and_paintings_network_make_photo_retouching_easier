@@ -60,7 +60,7 @@ EP_MAX = 1000000
 
 MAX_STEPS_IN_EPISODE = 300
 
-N_WORKERS = 1
+N_WORKERS = 5
 
 device = '/gpu:0'
 

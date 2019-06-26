@@ -166,7 +166,8 @@ class A3C_Net(object):
                 dim_color_feature,
                 dim_vgg_feature, a_dim, LR_A,
                 LR_C,devcie,
-                global_AC=None):
+                global_AC=None,
+                vgg = None):
         """
 
         :param name:
@@ -180,12 +181,18 @@ class A3C_Net(object):
         :param global_AC:
         """
         with tf.device(device):
-            if type == 'local':
+            if type == 'VGG':
+                with tf.variable_scope(name):
+                    self.s_image = tf.placeholder(tf.float32, [None,WIDTH,HEIGHT,N_CHANNEL], name='state_image')
+                    self.vgg_feature,_ = model_vgg(input=self.s_image,model_path=VGG_PATH)
+
+            elif type == 'local':
                 with tf.variable_scope(name):
                     self.session = sess
                     self.global_AC = global_AC
+                    self.vgg = vgg
                     self.a_dim = a_dim
-                    self.s_image   = tf.placeholder(tf.float32, [None,WIDTH,HEIGHT,N_CHANNEL], name='state_image')
+                    #self.s_image   = tf.placeholder(tf.float32, [None,WIDTH,HEIGHT,N_CHANNEL], name='state_image')
                     # self.s_feature 对应的是 黑白分布特征or色彩分布特征
                     # dim_color_feature 是 黑白分布特征or色彩分布特征 的 维度
                     self.s_feature = tf.placeholder(tf.float32, [None, dim_color_feature], name='state_feature')
@@ -196,36 +203,31 @@ class A3C_Net(object):
                     self.OPT_A = tf.train.RMSPropOptimizer(LR_A,name='Local_OPT_A')
                     self.OPT_C = tf.train.RMSPropOptimizer(LR_C,name='Local_OPT_C')
 
-                    self.vgg_feature,self.vgg_params = model_vgg(input=self.s_image,model_path=VGG_PATH)
+                    # self.vgg_feature,self.vgg_params = model_vgg(input=self.s_image,model_path=VGG_PATH)
                     # print("self.vgg_feature shape",self.vgg_feature.shape)
                     # print("self.s_feature   shape",self.s_feature.shape)
 
                     # 色彩特征or黑白特征 串联上 语义特征 ，作为网络的输入
                     #   self.s_feature ---> dim_global_feature
                     #   self.s_feature ---> dim_global_feature
-                    self.s = tf.concat([self.vgg_feature,self.s_feature],axis=1)
+                    self.s = tf.concat([self.vgg.vgg_feature,self.s_feature],axis=1)
                     # print("self.s shape:",self.s.shape)
                     self._build_net(input=self.s,input_dim=dim_color_feature+dim_vgg_feature,name='local_Net')
                     self._prepare_loss_and_train(name)
-                    # self.network_initial()
 
             elif type == 'global':
                 with tf.variable_scope(name):
                     self.session = sess
                     self.a_dim = a_dim
-                    self.s_image   = tf.placeholder(tf.float32, [None,WIDTH,HEIGHT,N_CHANNEL], name='state_image')
+                    #self.s_image   = tf.placeholder(tf.float32, [None,WIDTH,HEIGHT,N_CHANNEL], name='state_image')
                     self.s_feature = tf.placeholder(tf.float32, [None, dim_color_feature], name='state_feature')
                     self.q_v = tf.placeholder(tf.float32, [None, 1], name='state_action_value')
                     self.a = tf.placeholder(tf.int32, [None,1])
 
-                    self.vgg_feature,self.vgg_params = model_vgg(input=self.s_image,model_path=VGG_PATH)
-
                     # 色彩特征or黑白特征 串联上 语义特征 ，作为网络的输入
-                    self.s = tf.concat([self.vgg_feature,self.s_feature],axis=1)
+                    self.s = tf.placeholder(tf.float32,[None,dim_color_feature+dim_vgg_feature],name='fake_placeholder')
                     # print("self.s shape:",self.s.shape)
-                    self._build_net(input=self.s,input_dim=dim_color_feature+dim_vgg_feature,name='global_Net')
-
-                    # self.network_initial()
+                    self._build_net(input=self.s,input_dim=dim_color_feature+dim_vgg_feature,name='global'+name)
 
 
 
@@ -285,15 +287,17 @@ class A3C_Net(object):
                 self.pull_a_params_op = [l_p.assign(g_p) for l_p, g_p in zip(self.a_params, self.global_AC.a_params)]
                 self.pull_c_params_op = [l_p.assign(g_p) for l_p, g_p in zip(self.c_params, self.global_AC.c_params)]
 
+
     def choose_action(self,s_image,s_feature):
-        prob_weights = self.session.run(self.a_prob,feed_dict={self.s_image: s_image[np.newaxis, :],
+        prob_weights = self.session.run(self.a_prob,feed_dict={self.vgg.s_image: s_image[np.newaxis, :],
                                                                self.s_feature: s_feature[np.newaxis, :]})
         action = np.random.choice(range(prob_weights.shape[1]), p=prob_weights.ravel())
         return action, prob_weights
 
+
     def get_value(self,s_image,s_feature):
         return self.session.run(self.value,{
-            self.s_image  : s_image[np.newaxis, :],
+            self.vgg.s_image  : s_image[np.newaxis, :],
             self.s_feature: s_feature[np.newaxis, :]})[0,0]
 
     # def network_initial(self):
@@ -301,10 +305,10 @@ class A3C_Net(object):
 
     def update_network(self, s_image,s_feature, a, q_value):
         self.session.run([self.update_a_op,self.update_c_op],
-                                     {self.s_image   : s_image,
-                                      self.q_v       : q_value,
-                                      self.s_feature : s_feature,
-                                      self.a         : a
+                                     {self.vgg.s_image: s_image,
+                                      self.q_v        : q_value,
+                                      self.s_feature  : s_feature,
+                                      self.a          : a
                                       })
 
 

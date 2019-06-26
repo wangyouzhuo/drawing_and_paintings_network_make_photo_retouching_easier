@@ -44,11 +44,14 @@ if __name__ == "__main__":
 
 
         GLOBAL_SUB    = A3C_Net(type='global',name='Global_Sub', sess=SESS,
-                             dim_color_feature=dim_color_hist,
-                             dim_vgg_feature=dim_image_feature,
-                             a_dim=dim_sub_action,
-                             LR_A=LR_A,LR_C=LR_A,devcie=device,
-                             global_AC=None)
+                                       dim_color_feature=dim_color_hist,
+                                       dim_vgg_feature=dim_image_feature,
+                                       a_dim=dim_sub_action,
+                                       LR_A=LR_A,LR_C=LR_A,devcie=device,
+                                       global_AC=None)
+
+        VGG = A3C_Net(type='VGG',name='VGG', sess=None,dim_color_feature=None,
+                     dim_vgg_feature=None,a_dim=None,LR_A=None,LR_C=None,devcie=None,global_AC=None)
 
         workers = []
 
@@ -62,7 +65,8 @@ if __name__ == "__main__":
                                      dim_vgg_feature=dim_image_feature,
                                      master_a_dim=dim_master_action,
                                      sub_a_dim=dim_sub_action,
-                                     coord = COORD))
+                                     coord = COORD,
+                                     vgg=VGG))
 
         SESS.run(tf.global_variables_initializer())
 
