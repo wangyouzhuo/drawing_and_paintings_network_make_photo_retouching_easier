@@ -55,7 +55,7 @@ class Environment(object):
         reward = self.l2_distance_old - new_l2_distance
         self.l2_distance_old = new_l2_distance
         self.current_image = result
-        print("sub_distance: ",new_l2_distance)
+        #print("sub_distance: ",new_l2_distance)
         if new_l2_distance < TERMINAL_THRESHOLD:
             self.done = True
         # result = np.clip(result*255.0,a_min=0.0,a_max=255.0).astype(np.uint8)
@@ -68,7 +68,7 @@ class Environment(object):
         reward = self.l2_distance_old - new_l2_distance
         self.l2_distance_old = new_l2_distance
         self.current_image = result
-        print("master_distance: ",new_l2_distance)
+        #print("master_distance: ",new_l2_distance)
         if new_l2_distance < TERMINAL_THRESHOLD:
             self.done = True
         # result = np.clip(result*255.0,a_min=0.0,a_max=255.0).astype(np.uint8)

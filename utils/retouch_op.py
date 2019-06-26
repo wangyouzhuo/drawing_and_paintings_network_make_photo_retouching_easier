@@ -103,6 +103,7 @@ def hue_yellow_hue_right(image,beta=0.2):
 
 
 
+
 # 整体加饱和
 def glo_saturation_up(image,beta=0.2):
     raw_img = image.copy()
@@ -123,6 +124,7 @@ def glo_saturation_down(image,beta=0.2):
         return result
     else:
         return image
+
 # 蓝色饱和增大
 def sat_blue_up(image,beta=0.2):
     result = update_specific_saturation(image,target_color_hsv=blue,action='right',step_size=beta)
@@ -137,6 +139,7 @@ def sat_blue_down(image,beta=0.2):
         return result
     else:
         return image
+
 # 绿色饱和增大
 def sat_green_up(image,beta=0.2):
     result = update_specific_saturation(image,target_color_hsv=green,action='right',step_size=beta)
@@ -151,6 +154,8 @@ def sat_green_down(image,beta=0.2):
         return result
     else:
         return image
+
+
 # 黄色饱和增大
 def sat_yellow_up(image,beta=0.2):
     result = update_specific_saturation(image,target_color_hsv=yellow,action='right',step_size=beta)
@@ -177,6 +182,7 @@ def glo_blue_curve_light(image,beta = 0.4):
         return result
     else:
         return image
+
 # 压暗蓝色曲线
 def glo_blue_curve_dark(image,beta = 0.4):
     result = curve_color_change(image,action='left',target_color='blue')
@@ -186,6 +192,7 @@ def glo_blue_curve_dark(image,beta = 0.4):
         return result
     else:
         return image
+
 # 提亮红色曲线
 def glo_red_curve_light(image,beta = 0.4):
     result = curve_color_change(image,action='right',target_color='red')
@@ -204,6 +211,7 @@ def glo_red_curve_dark(image,beta = 0.4):
         return result
     else:
         return image
+
 # 提亮绿色曲线
 def glo_green_curve_light(image,beta = 0.4):
     result = curve_color_change(image,action='right',target_color='green')
@@ -224,10 +232,13 @@ def glo_green_curve_dark(image,beta = 0.4):
         return image
 
 
+# 4 actions in Master_action
 master_action_list = [light,dark,contrast,gray,
                       # hold
                       ]
 
+
+# 18 actions in Sub_action
 sub_action_list = [
                      hue_blue_hue_left   ,hue_blue_hue_right  ,
                      hue_green_hue_left  ,hue_green_hue_right ,

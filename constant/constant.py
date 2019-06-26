@@ -1,10 +1,14 @@
 
 root = '/home/wyz/PycharmProjects/drawing_and_paintings_network_make_photo_retouching_easier/'
 
+
+# 存放扭曲过的数据
 dirty_data_path  = root + '/data/train_data/'
 
+# 存放  最理想的 源数据
 target_data_path = root + '/data/source_data/'
 
+# 存放我们学习到的结果
 result_save_path = root +'/data/result_image/'
 
 """
@@ -24,8 +28,8 @@ N_CHANNEL = 3
 
 GAMMA = 0.99
 
-green = {'h_low': 38, 'h_up':75  }
-blue  = {'h_low': 75, 'h_up':130 }
+green = {'h_low': 38 ,'h_up':75  }
+blue  = {'h_low': 75 ,'h_up':130 }
 red   = {'h_low': 160,'h_up':179 }
 Violet= {'h_low': 130,'h_up':160 }
 yellow= {'h_low': 22 ,'h_up':38  }
@@ -42,19 +46,23 @@ B_Mean = 128.0
 A_ITER = 10
 C_ITER = 10
 
-
+# vgg的特征维度
 dim_image_feature = 4096
 
-
+# 彩色 or 黑白 的特征维度
 dim_color_hist = 256*3
 dim_gray_hist = 256
 
 
-TERMINAL_THRESHOLD = 350
+TERMINAL_THRESHOLD = 250
 
 EP_MAX = 1000000
 
-MAX_STEPS_IN_EPISODE = 600
+MAX_STEPS_IN_EPISODE = 300
+
+N_WORKERS = 1
+
+device = '/gpu:0'
 
 
 

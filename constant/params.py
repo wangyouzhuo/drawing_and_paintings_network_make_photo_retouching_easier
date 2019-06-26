@@ -1,9 +1,6 @@
 from utils.retouch_op import *
 
 
-KL_Min  = 0.006666
-KL_Max  = 0.015
-KL_BETA = 0.5
 
 
 LR_A = 0.0001

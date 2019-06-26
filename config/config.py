@@ -1,0 +1,1 @@
+ENTROPY_BETA = 0.001
