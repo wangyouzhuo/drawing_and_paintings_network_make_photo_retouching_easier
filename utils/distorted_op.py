@@ -52,7 +52,7 @@ def normalized(target_color_list):
 def global_dark(image):
     return curve_dark(image)
 
-#  全局变黑
+#  全局变灰
 def global_gray(image):
     return curve_dark_gray(image)
 
@@ -271,8 +271,6 @@ def distorted_landscapes(image):
     image = global_light(image=image)
     image = global_light(image=image)
 
-
-
     return image
 
 
@@ -298,6 +296,22 @@ def distorted_indoor(image):
     image = global_light(image=image)
 
     return image
+
+
+
+def disorted_plant(image):
+    image = global_light(image)
+    image = global_green_less(image)
+    image = global_saturation_down(image)
+    image = hue_yellow_left(image,step_size=0.2)
+    image = hue_green_left(image,step_size=0.2)
+    image = saturation_green_thin(image,stepsize=0.3)
+    image = global_gray(image)
+
+
+
+
+
 
 
 
@@ -333,7 +347,7 @@ if __name__ == '__main__':
         # show_image(indoor_image)
         # show_image(outdoor_image)
 
-        print(count/length)
+        print("当前进度:",round((count/length),3))
 
 
 
