@@ -310,9 +310,9 @@ def distorted_indoor(image):
 
 if __name__ == '__main__':
     count = 0
-    file_path = root + 'prepare_data_pair/tailoring_data/'
-    out_path  = root + 'data/train_data/'
-    source_out_path = root + 'data/source_data/'
+    file_path = root + 'prepare_data_pair/tailoring_data/'  # 用来扭曲的数据 被存放的位置
+    out_path  = root + 'data/train_data/'  # 存放 扭曲过后的源数据
+    source_out_path = root + 'data/source_data/'  # 存放 干净的源数据
     length = len(os.listdir(file_path))
     for pic_name in os.listdir(file_path):
         # count = count + 1
@@ -322,10 +322,10 @@ if __name__ == '__main__':
         count = count + 1
         image_path = file_path + pic_name
         image = load_image2numpy(image_path)
-        save_image(image,source_out_path+str(count)+'.jpg')
+        save_image(image,source_out_path+str(count)+'.jpg')  # 干净的源数据 格式为  xx.jpg
 
         indoor_image = distorted_indoor(image)
-        save_image(indoor_image,out_path+str(count)+"_a"+'.jpg')
+        save_image(indoor_image,out_path+str(count)+"_a"+'.jpg') # 扭曲过的数据 格式为 xx_a.jpg
 
         # outdoor_image = distorted_landscapes(image)
         # save_image(outdoor_image,out_path+str(count)+"_b"+'.jpg')

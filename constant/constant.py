@@ -56,11 +56,11 @@ dim_gray_hist = 256
 
 TERMINAL_THRESHOLD = 250
 
-EP_MAX = 1000000
+EP_MAX = 500000
 
 MAX_STEPS_IN_EPISODE = 300
 
-N_WORKERS = 5
+N_WORKERS = 10
 
 device = '/gpu:0'
 
