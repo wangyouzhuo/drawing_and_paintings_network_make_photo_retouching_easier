@@ -1,6 +1,8 @@
 
-root = '/Users/wangyouzhuo/PycharmProjects/drawing_and_paintings_network_make_photo_retouching_easier/'
-
+# for mac
+#root = '/Users/wangyouzhuo/PycharmProjects/drawing_and_paintings_network_make_photo_retouching_easier'
+# for linux
+root = '/home/wyz/PycharmProjects/drawing_and_paintings_network_make_photo_retouching_easier'
 
 # 存放扭曲过的数据
 dirty_data_path  = root + '/data/train_data/'
@@ -60,7 +62,9 @@ EP_MAX = 500000
 
 MAX_STEPS_IN_EPISODE = 300
 
-N_WORKERS = 10
+N_WORKERS = 3
+
+K = 5
 
 device = '/gpu:0'
 

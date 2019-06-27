@@ -162,14 +162,15 @@ class PPO_Net(object):
 
 class A3C_Net(object):
 
-    def __init__(self,type,name, sess,
+    def __init__(self,type,name,sess,
                 dim_color_feature,
+                dim_gray_feature,
                 dim_vgg_feature, a_dim, LR_A,
                 LR_C,devcie,
                 global_AC=None,
-                vgg = None):
+                vgg = None,
+                function = None):
         """
-
         :param name:
         :param sess:
         :param dim_global_feature: 色彩特征or黑白特征 的 维度
@@ -192,42 +193,62 @@ class A3C_Net(object):
                     self.global_AC = global_AC
                     self.vgg = vgg
                     self.a_dim = a_dim
-                    #self.s_image   = tf.placeholder(tf.float32, [None,WIDTH,HEIGHT,N_CHANNEL], name='state_image')
-                    # self.s_feature 对应的是 黑白分布特征or色彩分布特征
-                    # dim_color_feature 是 黑白分布特征or色彩分布特征 的 维度
-                    self.s_feature = tf.placeholder(tf.float32, [None, dim_color_feature], name='state_feature')
-                    # v_target
-                    self.q_v = tf.placeholder(tf.float32, [None, 1], name='state_action_value')
-                    self.a = tf.placeholder(tf.int32, [None,1])
 
                     self.OPT_A = tf.train.RMSPropOptimizer(LR_A,name='Local_OPT_A')
                     self.OPT_C = tf.train.RMSPropOptimizer(LR_C,name='Local_OPT_C')
 
-                    # self.vgg_feature,self.vgg_params = model_vgg(input=self.s_image,model_path=VGG_PATH)
-                    # print("self.vgg_feature shape",self.vgg_feature.shape)
-                    # print("self.s_feature   shape",self.s_feature.shape)
+                    self.q_v = tf.placeholder(tf.float32, [None, 1], name='state_action_value')
+                    self.a = tf.placeholder(tf.int32, [None,1])
 
-                    # 色彩特征or黑白特征 串联上 语义特征 ，作为网络的输入
-                    #   self.s_feature ---> dim_global_feature
-                    #   self.s_feature ---> dim_global_feature
-                    self.s = tf.concat([self.vgg.vgg_feature,self.s_feature],axis=1)
+                    self.color_feature = tf.placeholder(tf.float32, [None, dim_color_feature], name='color_feature')
+                    self.gray_feature  = tf.placeholder(tf.float32, [None, dim_gray_feature], name='gray_feature')
+
+                    if function   == 'sub_gray':
+                        dim_state = dim_gray_feature
+                        self.s_feature = tf.concat([self.vgg.vgg_feature,self.gray_feature],axis=1)
+                    elif function == 'sub_hue':
+                        dim_state = dim_color_feature
+                        self.s_feature = tf.concat([self.vgg.vgg_feature,self.color_feature],axis=1)
+                    elif function == 'sub_saturation':
+                        dim_state = dim_color_feature
+                        self.s_feature = tf.concat([self.vgg.vgg_feature,self.color_feature],axis=1)
+                    elif function == 'sub_whitebalance':
+                        dim_state = dim_color_feature
+                        self.s_feature = tf.concat([self.vgg.vgg_feature,self.color_feature],axis=1)
+                    elif function == 'master':
+                        dim_state = dim_color_feature+dim_gray_feature
+                        self.s_feature = tf.concat([self.vgg.vgg_feature,self.gray_feature,self.color_feature],axis=1)
+
+
+                    # self.s = tf.concat([self.vgg.vgg_feature,self.s_feature],axis=1)
                     # print("self.s shape:",self.s.shape)
-                    self._build_net(input=self.s,input_dim=dim_color_feature+dim_vgg_feature,name='local_Net')
+                    self._build_net(input=self.s_feature,input_dim=(dim_state+dim_image_feature),name='local_Net')
                     self._prepare_loss_and_train(name)
 
             elif type == 'global':
                 with tf.variable_scope(name):
                     self.session = sess
                     self.a_dim = a_dim
-                    #self.s_image   = tf.placeholder(tf.float32, [None,WIDTH,HEIGHT,N_CHANNEL], name='state_image')
-                    self.s_feature = tf.placeholder(tf.float32, [None, dim_color_feature], name='state_feature')
-                    self.q_v = tf.placeholder(tf.float32, [None, 1], name='state_action_value')
-                    self.a = tf.placeholder(tf.int32, [None,1])
+                    if function == 'master':
+                        dim_state = dim_color_feature+dim_gray_feature
+                        self.s_feature = tf.placeholder(tf.float32, [None, dim_state], name='state_feature')
+                    elif function == 'sub_gray':
+                        dim_state = dim_gray_feature
+                        self.s_feature = tf.placeholder(tf.float32, [None, dim_state], name='state_feature')
+                    elif function == 'sub_hue':
+                        dim_state = dim_color_feature
+                        self.s_feature = tf.placeholder(tf.float32, [None, dim_state], name='state_feature')
+                    elif function == 'sub_saturation':
+                        dim_state = dim_color_feature
+                        self.s_feature = tf.placeholder(tf.float32, [None, dim_state], name='state_feature')
+                    elif function == 'sub_whitebalance':
+                        dim_state = dim_color_feature
+                        self.s_feature = tf.placeholder(tf.float32, [None, dim_state], name='state_feature')
 
                     # 色彩特征or黑白特征 串联上 语义特征 ，作为网络的输入
-                    self.s = tf.placeholder(tf.float32,[None,dim_color_feature+dim_vgg_feature],name='fake_placeholder')
+                    self.s = tf.placeholder(tf.float32,[None,(dim_state+dim_image_feature)],name='fake_placeholder')
                     # print("self.s shape:",self.s.shape)
-                    self._build_net(input=self.s,input_dim=dim_color_feature+dim_vgg_feature,name='global'+name)
+                    self._build_net(input=self.s,input_dim=(dim_state+dim_image_feature),name='global'+name)
 
 
 
@@ -288,26 +309,31 @@ class A3C_Net(object):
                 self.pull_c_params_op = [l_p.assign(g_p) for l_p, g_p in zip(self.c_params, self.global_AC.c_params)]
 
 
-    def choose_action(self,s_image,s_feature):
-        prob_weights = self.session.run(self.a_prob,feed_dict={self.vgg.s_image: s_image[np.newaxis, :],
-                                                               self.s_feature: s_feature[np.newaxis, :]})
+    def choose_action(self,s_image,color_feature,gray_feature):
+        prob_weights = self.session.run(self.a_prob,feed_dict={self.vgg.s_image  : s_image[np.newaxis, :],
+                                                               self.color_feature: color_feature[np.newaxis, :],
+                                                               self.gray_feature : gray_feature[np.newaxis, :],
+                                                               })
         action = np.random.choice(range(prob_weights.shape[1]), p=prob_weights.ravel())
         return action, prob_weights
 
 
-    def get_value(self,s_image,s_feature):
+    def get_value(self,s_image,color_feature,gray_feature):
         return self.session.run(self.value,{
             self.vgg.s_image  : s_image[np.newaxis, :],
-            self.s_feature: s_feature[np.newaxis, :]})[0,0]
+            self.color_feature: color_feature[np.newaxis, :],
+            self.gray_feature : gray_feature[np.newaxis, :]}
+                )[0,0]
 
     # def network_initial(self):
     #     self.session.run(tf.global_variables_initializer())
 
-    def update_network(self, s_image,s_feature, a, q_value):
+    def update_network(self, s_image,color_feature,gray_feature, a, q_value):
         self.session.run([self.update_a_op,self.update_c_op],
                                      {self.vgg.s_image: s_image,
                                       self.q_v        : q_value,
-                                      self.s_feature  : s_feature,
+                                      self.color_feature : color_feature,
+                                      self.gray_feature  : gray_feature,
                                       self.a          : a
                                       })
 

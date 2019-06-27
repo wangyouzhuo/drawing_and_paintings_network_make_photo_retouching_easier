@@ -27,6 +27,18 @@ class Environment(object):
         self.action_trajectory = []
         self.done = False
 
+        self.gray_action_list = gray_action_list
+        self.hue_action_list = hue_action_list
+        self.saturation_action_list = saturation_action_list
+        self.whitebalance_action_list = whitebalance_action_list
+
+        self.sub_policy_list = []
+        self.sub_policy_list.append(gray_action_list)
+        self.sub_policy_list.append(hue_action_list)
+        self.sub_policy_list.append(saturation_action_list)
+        self.sub_policy_list.append(whitebalance_action_list)
+
+
 
 
     def reset(self):
@@ -73,6 +85,20 @@ class Environment(object):
             self.done = True
         # result = np.clip(result*255.0,a_min=0.0,a_max=255.0).astype(np.uint8)
         return result,self.get_color_feature(result),self.get_gray_feature(result),reward,self.done
+
+
+    def take_action(self,action_index,policy_index):
+        result = self.sub_policy_list[policy_index][action_index](self.current_image)
+        new_l2_distance = compute_color_l2(current_image=result, target_image=self.target_image)
+        reward = self.l2_distance_old - new_l2_distance
+        self.l2_distance_old = new_l2_distance
+        self.current_image = result
+        if new_l2_distance < TERMINAL_THRESHOLD:
+            self.done = True
+        # result = np.clip(result*255.0,a_min=0.0,a_max=255.0).astype(np.uint8)
+        return result,self.get_color_feature(result),self.get_gray_feature(result),reward,self.done
+
+
 
     def show(self):
         show_image(self.current_image)

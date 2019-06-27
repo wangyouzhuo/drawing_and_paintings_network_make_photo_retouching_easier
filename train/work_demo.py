@@ -10,7 +10,7 @@ from utils.global_count import _get_train_count,_append_trajectory_dict,_append_
 class AC_Worker(object):
 
     def __init__(self,name,master_global,sub_global,sess,device,
-                 LR_A,LR_C,dim_color_feature,dim_black_feature,
+                 LR_A,LR_C,dim_color_feature,dim_gray_feature,
                  dim_vgg_feature,master_a_dim,sub_a_dim,coord,vgg):
 
         self.coord = coord
@@ -20,22 +20,37 @@ class AC_Worker(object):
         self.env = Environment(dirty_path=dirty_data_path,target_path=target_data_path)
 
         self.Master_net = A3C_Net(type='local',name='Master_local_'+name,sess=sess,
-                                   dim_color_feature=dim_black_feature,
-                                   dim_vgg_feature=dim_vgg_feature,
-                                   a_dim=master_a_dim,
-                                   LR_A=LR_A,LR_C=LR_C,devcie=device,
-                                   global_AC=master_global,
-                                   vgg = vgg)
+                            dim_color_feature=dim_color_feature,dim_gray_feature=dim_gray_feature,
+                            dim_vgg_feature=dim_vgg_feature,a_dim=master_a_dim,
+                            LR_A=LR_A,LR_C=LR_C,devcie=device,global_AC=master_global,
+                            vgg = vgg,function='master')
 
-        self.Sub_Net    = A3C_Net(type='local',name='Sub_local_'+name,sess=sess,
-                                  dim_color_feature=dim_color_feature,
-                                  dim_vgg_feature=dim_vgg_feature,
-                                  a_dim=sub_a_dim,
-                                  LR_A=LR_A,
-                                  LR_C=LR_C,
-                                  devcie=device,
-                                  global_AC=sub_global,
-                                  vgg = vgg)
+        self.Sub_Nets = []
+
+        # sub_policy 0 --> gray_ney
+        self.Sub_Nets.append(A3C_Net(type='local',name='Sub_local_'+name,sess=sess,
+                                     dim_color_feature=dim_color_feature,dim_gray_feature = dim_gray_feature,
+                                     dim_vgg_feature=dim_vgg_feature,a_dim=sub_a_dim[0],LR_A=LR_A,LR_C=LR_C,devcie=device,
+                                     global_AC=sub_global[0],vgg = vgg,function='sub_gray'))
+
+        # sub_policy 1 --> hue_net
+        self.Sub_Nets.append(A3C_Net(type='local',name='Sub_local_'+name,sess=sess,
+                                     dim_color_feature=dim_color_feature,dim_gray_feature = dim_gray_feature,
+                                     dim_vgg_feature=dim_vgg_feature,a_dim=sub_a_dim[1],LR_A=LR_A,LR_C=LR_C,devcie=device,
+                                     global_AC=sub_global[1],vgg = vgg,function='sub_hue'))
+
+        # sub_policy 2 --> saturation_net
+        self.Sub_Nets.append(A3C_Net(type='local',name='Sub_local_'+name,sess=sess,
+                                     dim_color_feature=dim_color_feature,dim_gray_feature = dim_gray_feature,
+                                     dim_vgg_feature=dim_vgg_feature,a_dim=sub_a_dim[2],LR_A=LR_A,LR_C=LR_C,devcie=device,
+                                     global_AC=sub_global[2],vgg = vgg,function='sub_saturation'))
+
+        # sub_policy 3 --> whitebalance_net
+        self.Sub_Nets.append(A3C_Net(type='local',name='Sub_local_'+name,sess=sess,
+                                     dim_color_feature=dim_color_feature,dim_gray_feature = dim_gray_feature,
+                                     dim_vgg_feature=dim_vgg_feature,a_dim=sub_a_dim[3],LR_A=LR_A,LR_C=LR_C,devcie=device,
+                                     global_AC=sub_global[3],vgg = vgg,function='sub_whitebalance'))
+
 
     def work(self):
         while not self.coord.should_stop() and _get_train_count() <= EP_MAX:
@@ -45,14 +60,17 @@ class AC_Worker(object):
             ep_r  = 0
             steps = 0
             master_reward = []
+            count = 0
+            buffer_s_image,buffer_color_feature,buffer_gray_feature,buffer_a,buffer_r = [],[],[],[],[]
             while True:
                 #-----------------------------------sample sub_policy from master_net-----------------------------------
-                if steps%K == 0:
+                if count == 0:
                     start_color_feature,start_gray_feature,start_s_image \
                         = color_feature,gray_feature,s_image
                     sub_policy_index, _ = self.Master_net.choose_action(color_feature = start_color_feature,
                                                                         gray_feature  = start_gray_feature,
                                                                         s_image       = start_s_image)
+
                 #------------------------------------sample action from sub_policy-------------------------------
                 a, _ = self.Sub_Nets[sub_policy_index].choose_action(gray_feature  = gray_feature,
                                                                      color_feature = color_feature,
@@ -60,10 +78,11 @@ class AC_Worker(object):
                 trajectory.append([sub_policy_index,a])
                 # take the sampled sub_action
                 s_image_next, color_feature_next, gray_feature_next, r, done \
-                    = self.env.take_sub_action(action_index = a,policy_index = sub_policy_index )
+                    = self.env.take_action(action_index = a,policy_index = sub_policy_index )
                 master_reward.append(r)
                 steps = steps + 1
                 ep_r = ep_r + r
+                count = count + 1
                 # append the buffer
                 buffer_s_image.append(s_image)
                 buffer_color_feature.append(color_feature)
@@ -72,7 +91,7 @@ class AC_Worker(object):
                 buffer_r.append(r)
 
                 # update the master_net and sub_net
-                if steps%(K+N) == 0 or done:
+                if count >= K or done:
                     #------------------------------------update sub_net-------------------------------------
                     if done:
                         q = 0
@@ -118,12 +137,11 @@ class AC_Worker(object):
                     buffer_a_for_master             = [sub_policy_index]
                     buffer_q_for_master             = [q_master]
 
-                    buffer_s_image_for_master, buffer_gray_feature_for_master,buffer_color_feature_for_master \
+                    buffer_s_image_for_master, buffer_gray_feature_for_master,buffer_color_feature_for_master,\
                     buffer_a_for_master, buffer_q_for_master \
-                        = \
-                    np.array(buffer_s_image_for_master), np.vstack(buffer_gray_feature_for_master), \
-                    np.vstack(buffer_color_feature_for_master), np.vstack(buffer_a_for_master), \
-                    np.vstack(buffer_q_for_master)
+                        = np.array(buffer_s_image_for_master), np.vstack(buffer_gray_feature_for_master), \
+                          np.vstack(buffer_color_feature_for_master), np.vstack(buffer_a_for_master), \
+                          np.vstack(buffer_q_for_master)
 
                     self.Master_net.update_network(s_image=buffer_s_image_for_master,
                                                    color_feature=buffer_color_feature_for_master,
@@ -131,7 +149,7 @@ class AC_Worker(object):
                                                    a=buffer_a_for_master,
                                                    q_value=buffer_q_for_master)
                     master_reward = []
-
+                    count = 0
                 if done or steps>=MAX_STEPS_IN_EPISODE:
                     _append_reward_list(ep_r)
                     print("Epi:%6s || Success:%5s || Steps:%3s || ep_r:%6s || Img::%8s" % (EP_COUNT,

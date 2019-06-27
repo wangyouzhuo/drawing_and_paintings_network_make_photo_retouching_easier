@@ -59,8 +59,8 @@ def gray(image,beta=0.2):   # 降对比
         return raw_image
 
 
-def dark_more_dark():   # 暗部更暗
-    pass
+def dark_more_dark(image,beta=0.2):   # 暗部更暗
+    return image
 
 
 #-------------------------第二组动作-----6个-------调节画面的 色相 beta代表作用的力度-------------------------------------
@@ -263,3 +263,14 @@ sub_action_list = [
                      glo_red_curve_dark  ,glo_red_curve_light,
                      # hold
                     ]
+
+gray_action_list = [light,dark,contrast,gray,dark_more_dark]
+
+hue_action_list = [hue_blue_hue_left   , hue_blue_hue_right  , hue_green_hue_left,
+                   hue_green_hue_right , hue_yellow_hue_left , hue_yellow_hue_right]
+
+saturation_action_list = [glo_saturation_up,glo_saturation_down,sat_blue_up,
+                          sat_blue_down,sat_green_up,sat_green_down,sat_yellow_up,sat_yellow_down]
+
+whitebalance_action_list = [glo_blue_curve_light,glo_blue_curve_dark,glo_red_curve_light,
+                            glo_red_curve_dark,glo_green_curve_light,glo_green_curve_dark]

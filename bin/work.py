@@ -10,7 +10,7 @@ from utils.global_count import _get_train_count,_append_trajectory_dict,_append_
 class AC_Worker(object):
 
     def __init__(self,name,master_global,sub_global,sess,device,
-                 LR_A,LR_C,dim_color_feature,dim_black_feature,
+                 LR_A,LR_C,dim_color_feature,dim_gray_feature,
                  dim_vgg_feature,master_a_dim,sub_a_dim,coord,vgg):
 
         self.coord = coord
@@ -20,7 +20,8 @@ class AC_Worker(object):
         self.env = Environment(dirty_path=dirty_data_path,target_path=target_data_path)
 
         self.Master_net = A3C_Net(type='local',name='Master_local_'+name,sess=sess,
-                                   dim_color_feature=dim_black_feature,
+                                   dim_color_feature=dim_color_feature,
+                                   dim_gray_feature=dim_gray_feature,
                                    dim_vgg_feature=dim_vgg_feature,
                                    a_dim=master_a_dim,
                                    LR_A=LR_A,LR_C=LR_C,devcie=device,
@@ -29,6 +30,7 @@ class AC_Worker(object):
 
         self.Sub_Net    = A3C_Net(type='local',name='Sub_local_'+name,sess=sess,
                                   dim_color_feature=dim_color_feature,
+                                  dim_gray_feature=dim_gray_feature,
                                   dim_vgg_feature=dim_vgg_feature,
                                   a_dim=sub_a_dim,
                                   LR_A=LR_A,
