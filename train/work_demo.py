@@ -53,46 +53,6 @@ class AC_Worker(object):
                     sub_policy_index, _ = self.Master_net.choose_action(color_feature = start_color_feature,
                                                                         gray_feature  = start_gray_feature,
                                                                         s_image       = start_s_image)
-                    """
-                    if done:
-                        q = 0
-                    else:
-                        q = self.Master_net.get_value(color_feature=s_gray_feature_next,s_image=s_image_next)
-                    buffer_q_for_master = []
-                    q = sum_reward + GAMMA * q
-                    buffer_s_image_for_master.append(s_image)
-                    buffer_s_feature_for_master.append(s_gray_feature)
-                    buffer_a_for_master.append(sub_policy_index)
-                    buffer_q_for_master.append(q)
-                    buffer_s_image_for_master,buffer_s_feature_for_master, \
-                    buffer_a_for_master, buffer_q_for_master = np.array(buffer_s_image_for_master), \
-                                                               np.vstack(buffer_s_feature_for_master), \
-                                                               np.vstack(buffer_a_for_master), \
-                                                               np.vstack(buffer_q_for_master)
-                    # print("buffer_s_feature gray:",buffer_s_feature_for_master)
-                    self.Master_net.update_network(s_image   = buffer_s_image_for_master,
-                                                   s_feature = buffer_s_feature_for_master,
-                                                   a         = buffer_a_for_master,
-                                                   q_value   = buffer_q_for_master)
-                    buffer_s_image_for_master, \
-                    buffer_s_feature_for_master, \
-                    buffer_a_for_master, \
-                    buffer_q_for_master = [], [], [], []
-                    master_reward = []
-                    s_image,s_color_feature,s_gray_feature = s_image_next, s_color_feature_next, s_gray_feature_next
-
-                    if done or steps>=MAX_STEPS_IN_EPISODE:
-                        print("Epi:%6s || Success:%5s || Steps:%3s || ep_r:%6s || Img::%8s"%(EP_COUNT,done,steps,round(ep_r,3),self.env.img_name))
-                        _append_reward_list(ep_r)
-                        _add_train_count()
-                        if done is False:
-                            #self.env.save_env_image(success=False,epi=EP_COUNT)
-                            pass
-                        elif done is True:
-                            _append_trajectory_dict(EP_COUNT,trajectory)
-                            self.env.save_env_image(success=True,epi=EP_COUNT)
-                        break
-                    """
                 #------------------------------------sample action from sub_policy-------------------------------
                 a, _ = self.Sub_Nets[sub_policy_index].choose_action(gray_feature  = gray_feature,
                                                                      color_feature = color_feature,
@@ -170,7 +130,7 @@ class AC_Worker(object):
                                                    gray_feature=buffer_gray_feature_for_master,
                                                    a=buffer_a_for_master,
                                                    q_value=buffer_q_for_master)
-
+                    master_reward = []
 
                 if done or steps>=MAX_STEPS_IN_EPISODE:
                     _append_reward_list(ep_r)
