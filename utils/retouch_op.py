@@ -13,8 +13,9 @@ from constant.constant import *
 def hold(image):
     return image
 
-# -------------------------------------调整画面黑白色阶分布的op  beta代表op作用的力度-------------------------------
-def light(image,beta=0.2):
+# ---------------------动作1：5个动作----------------调整画面黑白色阶分布的op  beta代表op作用的力度-------------------------------
+
+def light(image,beta=0.2):       # 变亮
     raw_image = image.copy()
     image = curve_light(image)
     result = beta*image + (1-beta)*raw_image
@@ -24,7 +25,7 @@ def light(image,beta=0.2):
     else:
         return raw_image
 
-def dark(image,beta=0.2):
+def dark(image,beta=0.2):       # 变暗
     raw_image = image.copy()
     image = curve_dark(image)
     result = beta * image + (1 - beta) * raw_image
@@ -34,7 +35,7 @@ def dark(image,beta=0.2):
     else:
         return raw_image
 
-def contrast(image,beta=0.2):
+def contrast(image,beta=0.2):   # 加对比
     raw_image = image.copy()
     image = curve_contrast(image)
     result = beta * image + (1 - beta) * raw_image
@@ -44,7 +45,7 @@ def contrast(image,beta=0.2):
     else:
         return raw_image
 
-def gray(image,beta=0.2):
+def gray(image,beta=0.2):       # 变灰
     raw_image = image.copy()
     image = curve_dark_gray(image)
     result = beta * image + (1 - beta) * image
@@ -55,8 +56,11 @@ def gray(image,beta=0.2):
         return raw_image
 
 
-#-------------------------------------调节画面的 饱和&色相&色彩曲线  beta代表作用的力度-------------------------------------
+def dark_more_dark(image):      # 暗的更暗
+    return image
 
+
+#-------------------动作2:6个动作------------------调节画面的 色相  beta代表作用的力度-------------------------------------------
 
 # 蓝色色相偏左
 def hue_blue_hue_left(image,beta=0.2):
@@ -65,6 +69,7 @@ def hue_blue_hue_left(image,beta=0.2):
         return result
     else:
         return image
+
 # 蓝色色相偏右
 def hue_blue_hue_right(image,beta=0.2):
     result = update_specific_hue(image, target_color_hsv=blue, action='right', step_size=beta)
@@ -103,9 +108,10 @@ def hue_yellow_hue_right(image,beta=0.2):
 
 
 
+#-------------------------动作3：8个------------调节画面的 饱和 beta代表作用的力度----------------------------------------------
 
 # 整体加饱和
-def glo_saturation_up(image,beta=0.2):
+def glo_saturation_up(image,beta=0.3):
     raw_img = image.copy()
     image = update_global_saturation(img=image,action=0.3)
     result = beta * image + (1 - beta) * raw_img
@@ -114,8 +120,9 @@ def glo_saturation_up(image,beta=0.2):
         return result
     else:
         return image
+
 # 整体降饱和
-def glo_saturation_down(image,beta=0.2):
+def glo_saturation_down(image,beta=0.3):
     raw_img = image.copy()
     image = update_global_saturation(img=image,action=-0.3)
     result = beta * image + (1 - beta) * raw_img
@@ -126,14 +133,15 @@ def glo_saturation_down(image,beta=0.2):
         return image
 
 # 蓝色饱和增大
-def sat_blue_up(image,beta=0.2):
+def sat_blue_up(image,beta=0.3):
     result = update_specific_saturation(image,target_color_hsv=blue,action='right',step_size=beta)
     if check_histogram(result):
         return result
     else:
         return image
+
 # 蓝色饱和减小
-def sat_blue_down(image,beta=0.2):
+def sat_blue_down(image,beta=0.3):
     result = update_specific_saturation(image,target_color_hsv=blue,action='left',step_size=beta)
     if check_histogram(result):
         return result
@@ -141,14 +149,14 @@ def sat_blue_down(image,beta=0.2):
         return image
 
 # 绿色饱和增大
-def sat_green_up(image,beta=0.2):
+def sat_green_up(image,beta=0.3):
     result = update_specific_saturation(image,target_color_hsv=green,action='right',step_size=beta)
     if check_histogram(result):
         return result
     else:
         return image
 # 绿色饱和减小
-def sat_green_down(image,beta=0.2):
+def sat_green_down(image,beta=0.3):
     result = update_specific_saturation(image,target_color_hsv=green,action='left',step_size=beta)
     if check_histogram(result):
         return result
@@ -157,14 +165,14 @@ def sat_green_down(image,beta=0.2):
 
 
 # 黄色饱和增大
-def sat_yellow_up(image,beta=0.2):
+def sat_yellow_up(image,beta=0.3):
     result = update_specific_saturation(image,target_color_hsv=yellow,action='right',step_size=beta)
     if check_histogram(result):
         return result
     else:
         return image
 # 黄色饱和减小
-def sat_yellow_down(image,beta=0.2):
+def sat_yellow_down(image,beta=0.3):
     result = update_specific_saturation(image,target_color_hsv=yellow,action='left',step_size=beta)
     if check_histogram(result):
         return result
@@ -172,8 +180,10 @@ def sat_yellow_down(image,beta=0.2):
         return image
 
 
+#-----------------------动作4：6个--------------调节画面的 白平衡  beta代表作用的力度-------------------------------------
 
-# 提亮蓝色曲线
+
+# 提亮蓝色曲线-画面变蓝
 def glo_blue_curve_light(image,beta = 0.4):
     result = curve_color_change(image,action='right',target_color='blue')
     result = beta*result + (1-beta)*image
@@ -183,7 +193,7 @@ def glo_blue_curve_light(image,beta = 0.4):
     else:
         return image
 
-# 压暗蓝色曲线
+# 压暗蓝色曲线-画面少蓝
 def glo_blue_curve_dark(image,beta = 0.4):
     result = curve_color_change(image,action='left',target_color='blue')
     result = beta*result + (1-beta)*image
@@ -193,7 +203,7 @@ def glo_blue_curve_dark(image,beta = 0.4):
     else:
         return image
 
-# 提亮红色曲线
+# 提亮红色曲线-画面变红
 def glo_red_curve_light(image,beta = 0.4):
     result = curve_color_change(image,action='right',target_color='red')
     result = beta*result + (1-beta)*image
@@ -202,7 +212,8 @@ def glo_red_curve_light(image,beta = 0.4):
         return result
     else:
         return image
-# 压暗红色曲线
+
+# 压暗红色曲线-画面少红
 def glo_red_curve_dark(image,beta = 0.4):
     result = curve_color_change(image,action='left',target_color='red')
     result = beta*result + (1-beta)*image
@@ -212,7 +223,7 @@ def glo_red_curve_dark(image,beta = 0.4):
     else:
         return image
 
-# 提亮绿色曲线
+# 提亮绿色曲线-画面变绿
 def glo_green_curve_light(image,beta = 0.4):
     result = curve_color_change(image,action='right',target_color='green')
     result = beta*result + (1-beta)*image
@@ -221,7 +232,8 @@ def glo_green_curve_light(image,beta = 0.4):
         return result
     else:
         return image
-# 压暗绿色曲线
+
+# 压暗绿色曲线-画面少绿
 def glo_green_curve_dark(image,beta = 0.4):
     result = curve_color_change(image,action='left',target_color='green')
     result = beta*result + (1-beta)*image
