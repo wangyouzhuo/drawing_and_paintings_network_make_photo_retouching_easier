@@ -38,34 +38,30 @@ class AC_Worker(object):
                                   vgg = vgg)
 
     def work(self):
-
         while not self.coord.should_stop() and _get_train_count() <= EP_MAX:
             EP_COUNT = _add_train_count()
-            s_image,s_color_feature,s_gray_feature =self.env.reset()
-            buffer_s_image,buffer_s_feature, buffer_a, buffer_q,buffer_r = [],[],[],[],[]
+            s_image,color_feature,gray_feature =self.env.reset()
             trajectory = []
             ep_r  = 0
             steps = 0
-            # result,self.get_color_feature(result),self.get_gray_feature(result),reward,self.done
+            master_reward = []
             while True:
                 # update master_net
-                if (steps + 1) % MATSER_ACTION_ITERA == 0:
+                if steps%K == 0:
                     buffer_s_image_for_master, buffer_s_feature_for_master, buffer_a_for_master = [], [], []
-                    a, _ = self.Master_net.choose_action(s_feature=s_gray_feature,s_image=s_image)
-                    # print("choose_master_action")
-                    s_image_next,s_color_feature_next,s_gray_feature_next, r, done = self.env.take_master_action(a)
-                    trajectory.append(a)
-                    steps = steps + 1
-                    ep_r = ep_r + r
+                    sub_policy_index, _ = self.Master_net.choose_action(color_feature = s_gray_feature,
+                                                                        gray_feature  = gray_feature,
+                                                                        s_image       = s_image)
+                    """
                     if done:
                         q = 0
                     else:
-                        q = self.Master_net.get_value(s_feature=s_gray_feature_next,s_image=s_image_next)
+                        q = self.Master_net.get_value(color_feature=s_gray_feature_next,s_image=s_image_next)
                     buffer_q_for_master = []
-                    q = r + GAMMA * q
+                    q = sum_reward + GAMMA * q
                     buffer_s_image_for_master.append(s_image)
                     buffer_s_feature_for_master.append(s_gray_feature)
-                    buffer_a_for_master.append(a)
+                    buffer_a_for_master.append(sub_policy_index)
                     buffer_q_for_master.append(q)
                     buffer_s_image_for_master,buffer_s_feature_for_master, \
                     buffer_a_for_master, buffer_q_for_master = np.array(buffer_s_image_for_master), \
@@ -81,7 +77,9 @@ class AC_Worker(object):
                     buffer_s_feature_for_master, \
                     buffer_a_for_master, \
                     buffer_q_for_master = [], [], [], []
+                    master_reward = []
                     s_image,s_color_feature,s_gray_feature = s_image_next, s_color_feature_next, s_gray_feature_next
+
                     if done or steps>=MAX_STEPS_IN_EPISODE:
                         print("Epi:%6s || Success:%5s || Steps:%3s || ep_r:%6s || Img::%8s"%(EP_COUNT,done,steps,round(ep_r,3),self.env.img_name))
                         _append_reward_list(ep_r)
@@ -93,40 +91,46 @@ class AC_Worker(object):
                             _append_trajectory_dict(EP_COUNT,trajectory)
                             self.env.save_env_image(success=True,epi=EP_COUNT)
                         break
-                # update sub_ppo
-                a, _ = self.Sub_Net.choose_action(s_feature=s_color_feature,s_image=s_image)
-                # print("choose_sub_action")
-                s_image_next, s_color_feature_next, s_gray_feature_next, r, done = self.env.take_sub_action(a)
-                trajectory.append(a)
+                    """
+                # sample action from sub_policy
+                a, _ = self.Sub_Nets[sub_policy_index].choose_action(gray_feature  = gray_feature,
+                                                                     color_feature = color_feature,
+                                                                     s_image       = s_image)
+                trajectory.append([sub_policy_index,a])
+                # take the sampled sub_action
+                s_image_next, color_feature_next, gray_feature_next, r, done \
+                    = self.env.take_sub_action(action_index = a,policy_index = sub_policy_index )
+                master_reward.append(r)
                 steps = steps + 1
                 ep_r = ep_r + r
+                # append the buffer
                 buffer_s_image.append(s_image)
-                buffer_s_feature.append(s_color_feature)
+                buffer_color_feature.append(color_feature)
+                buffer_gray_feature.append(gray_feature)
                 buffer_a.append(a)
                 buffer_r.append(r)
-                if (steps+1)%SUB_ACTION_ITER == 0 or done:
+                # update the master_net and sub_net
+                if steps%(K+N) == 0 or done:
                     if done:
                         q = 0
                     else:
-                        q = self.Sub_Net.get_value(s_feature=s_color_feature_next,s_image=s_image_next)
+                        q = self.Sub_Nets[sub_policy_index].get_value(gray_feature = gray_feature_next,
+                                                color_feature=color_feature_next,s_image=s_image)
                     buffer_q = []
                     for r in buffer_r:
                         q = r + GAMMA * q
                         buffer_q.append(q)
                     buffer_q.reverse()
-                    buffer_s_image, buffer_s_feature, buffer_a, buffer_q = \
-                        np.array(buffer_s_image), \
-                        np.array(buffer_s_feature), \
-                        np.array(buffer_a), \
-                        np.array(buffer_q)
-                    # print("buffer_s_feature color:",buffer_s_feature)
-                    # print("buffer_a :",buffer_a)
-                    self.Sub_Net.update_network(s_image   = buffer_s_image  ,
-                                           s_feature = buffer_s_feature ,
-                                           a         = buffer_a[:,np.newaxis],
-                                           q_value   = buffer_q[:,np.newaxis])
-                    buffer_s_image, buffer_s_feature, buffer_a, buffer_r = [], [], [], []
-                s_image, s_color_feature, s_gray_feature = s_image_next, s_color_feature_next, s_gray_feature_next
+                    buffer_s_image, buffer_color_feature,buffer_gray_feature,buffer_a, buffer_q = \
+                    np.array(buffer_s_image),np.array(buffer_color_feature),\
+                    np.array(buffer_gray_feature),np.array(buffer_a),np.array(buffer_q)
+                    self.Sub_Nets[sub_policy_index].update_network(s_image   = buffer_s_image  ,
+                                                                   gray_feature = buffer_gray_feature ,
+                                                                   color_feature = buffer_color_feature ,
+                                                                   a         = buffer_a[:,np.newaxis],
+                                                                   q_value   = buffer_q[:,np.newaxis])
+                    buffer_s_image, buffer_color_feature,buffer_gray_feature,buffer_a, buffer_r = [],[],[],[],[]
+                s_image,color_feature,s_gray_feature = s_image_next,color_feature_next,gray_feature_next
                 if done or steps>=MAX_STEPS_IN_EPISODE:
                     _append_reward_list(ep_r)
                     print("Epi:%6s || Success:%5s || Steps:%3s || ep_r:%6s || Img::%8s" % (EP_COUNT,
