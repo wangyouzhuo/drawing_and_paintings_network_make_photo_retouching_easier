@@ -254,11 +254,12 @@ class A3C_Net(object):
 
     def _build_net(self, input,input_dim,name):
         with tf.variable_scope(name):
-            # input ---> s_encode
+            # input ---> fusion
             self.w_fusion = generate_fc_weight(shape=[input_dim, 2048], whe_train=True, name='w_fusion')
             self.b_fusion = generate_fc_weight(shape=[2048], whe_train=True, name='b_fusion')
             self.s_fusion = tf.nn.relu6(tf.matmul(input, self.w_fusion) + self.b_fusion)
 
+            # fusion ---> encode
             self.w_encode = generate_fc_weight(shape=[2048, 1024], whe_train=True, name='w_encode')
             self.b_encode = generate_fc_weight(shape=[1024], whe_train=True, name='b_encode')
             self.s_encode = tf.nn.relu6(tf.matmul(self.s_fusion, self.w_encode) + self.b_encode)

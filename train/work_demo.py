@@ -70,7 +70,6 @@ class AC_Worker(object):
                     sub_policy_index, _ = self.Master_net.choose_action(color_feature = start_color_feature,
                                                                         gray_feature  = start_gray_feature,
                                                                         s_image       = start_s_image)
-
                 #------------------------------------sample action from sub_policy-------------------------------
                 a, _ = self.Sub_Nets[sub_policy_index].choose_action(gray_feature  = gray_feature,
                                                                      color_feature = color_feature,
