@@ -77,6 +77,7 @@ def hue_blue_hue_right(image,beta=0.2):
         return result
     else:
         return image
+
 # 绿色色相偏左
 def hue_green_hue_left(image,beta=0.2):
     result = update_specific_hue(image, target_color_hsv=green, action='left', step_size=beta)
@@ -105,6 +106,8 @@ def hue_yellow_hue_right(image,beta=0.2):
         return result
     else:
         return image
+
+
 
 
 
@@ -180,8 +183,11 @@ def sat_yellow_down(image,beta=0.3):
         return image
 
 
-#-----------------------动作4：6个--------------调节画面的 白平衡  beta代表作用的力度-------------------------------------
 
+
+
+
+#-----------------------动作4：6个--------------调节画面的 白平衡  beta代表作用的力度-------------------------------------
 
 # 提亮蓝色曲线-画面变蓝
 def glo_blue_curve_light(image,beta = 0.4):
@@ -264,3 +270,18 @@ sub_action_list = [
                      glo_red_curve_dark  ,glo_red_curve_light,
                      # hold
                     ]
+
+
+saturation_op = [glo_saturation_up,glo_saturation_down,sat_blue_up ,
+                 sat_blue_down,sat_green_up,
+                 sat_green_down,sat_yellow_up,sat_yellow_down]
+
+hue_op = [hue_blue_hue_left,hue_blue_hue_right,
+          hue_green_hue_left,hue_green_hue_right,
+          hue_yellow_hue_left,hue_yellow_hue_right]
+
+white_balance_op = [glo_blue_curve_light ,glo_blue_curve_dark
+                   ,glo_red_curve_light  , glo_red_curve_dark
+                   ,glo_green_curve_light, glo_green_curve_dark]
+
+gray_op = [light,dark,contrast,gray,dark_more_dark]
