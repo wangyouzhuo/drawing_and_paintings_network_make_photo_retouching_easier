@@ -1,5 +1,5 @@
 
-root = '/home/wyz/PycharmProjects/drawing_and_paintings_network_make_photo_retouching_easier/'
+root = '/Users/wangyouzhuo/PycharmProjects/drawing_and_paintings_network_make_photo_retouching_easier/'
 
 
 # 存放扭曲过的数据

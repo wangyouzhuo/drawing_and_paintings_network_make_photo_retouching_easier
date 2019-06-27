@@ -303,18 +303,10 @@ def disorted_plant(image):
     image = global_light(image)
     image = global_green_less(image)
     image = global_saturation_down(image)
-    image = hue_yellow_left(image,step_size=0.5)
-    image = hue_green_left(image,step_size=0.5)
-    image = saturation_green_thin(image,stepsize=0.5)
+    image = hue_yellow_left(image,step_size=0.2)
+    image = hue_green_left(image,step_size=0.2)
+    image = saturation_green_thin(image,stepsize=0.3)
     image = global_gray(image)
-    image = global_gray(image)
-    image = global_light(image)
-    image = global_light(image)
-    image = global_light(image)
-    image = global_light(image)
-
-
-    return  image
 
 
 
@@ -346,10 +338,8 @@ if __name__ == '__main__':
         image = load_image2numpy(image_path)
         save_image(image,source_out_path+str(count)+'.jpg')  # 干净的源数据 格式为  xx.jpg
 
-        image = disorted_plant(image)
-        image = disorted_plant(image)
-
-        save_image(image,out_path+str(count)+"_a"+'.jpg') # 扭曲过的数据 格式为 xx_a.jpg
+        indoor_image = distorted_indoor(image)
+        save_image(indoor_image,out_path+str(count)+"_a"+'.jpg') # 扭曲过的数据 格式为 xx_a.jpg
 
         # outdoor_image = distorted_landscapes(image)
         # save_image(outdoor_image,out_path+str(count)+"_b"+'.jpg')
@@ -357,7 +347,7 @@ if __name__ == '__main__':
         # show_image(indoor_image)
         # show_image(outdoor_image)
 
-        print("当前进度:%s%%"%(100.0*round((count/length),3)))
+        print("当前进度:",round((count/length),3))
 
 
 
