@@ -2,10 +2,10 @@ from PIL import Image
 import os
 
 # 存放源图片的路径：
-source_path = "/home/wyz/桌面/富士film-c200/"
+source_path = "/home/wyz/桌面/原图/"
 
 # 存放裁剪后图片的路径
-result_path = "/home/wyz/桌面/裁剪-富士"
+result_path = "/home/wyz/桌面/原图clip"
 
 # 裁剪后的边长
 target_size = 224

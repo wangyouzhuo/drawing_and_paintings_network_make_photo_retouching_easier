@@ -6,6 +6,7 @@ from constant.constant import *
 
 
 def import_weight(file_path):
+    print(file_path)
     w = np.load(file_path,encoding='latin1').item()
     return w
 

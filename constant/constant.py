@@ -37,8 +37,8 @@ Violet= {'h_low': 130,'h_up':160 }
 yellow= {'h_low': 22 ,'h_up':38  }
 orange= {'h_low': 0  ,'h_up':22  }
 
-VGG_PATH = '/home/wyz/PycharmProjects/VGG_PARAMS/vgg16.npy'
-# VGG_PATH = root + '/data/vgg_params/vgg16.py'
+#VGG_PATH = '/home/wyz/PycharmProjects/VGG_PARAMS/vgg16.npy'
+VGG_PATH = root + '/data/vgg_params/vgg16.npy'
 
 
 R_MEAN = 128.0

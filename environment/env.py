@@ -73,6 +73,7 @@ class Environment(object):
         # result = np.clip(result*255.0,a_min=0.0,a_max=255.0).astype(np.uint8)
         return result,self.get_color_feature(result),self.get_gray_feature(result),reward,self.done
 
+
     def take_master_action(self, action_index):
         self.action_trajectory.append(self.master_action_list[action_index])
         result = self.master_action_list[action_index](self.current_image)
@@ -89,8 +90,10 @@ class Environment(object):
 
     def take_action(self,action_index,policy_index):
         result = self.sub_policy_list[policy_index][action_index](self.current_image)
+
         new_l2_distance = compute_color_l2(current_image=result, target_image=self.target_image)
         reward = self.l2_distance_old - new_l2_distance
+
         self.l2_distance_old = new_l2_distance
         self.current_image = result
         if new_l2_distance < TERMINAL_THRESHOLD:

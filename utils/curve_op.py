@@ -3,7 +3,7 @@ import math
 from PIL import Image
 from PIL import ImageEnhance
 import numpy as np
-# from utils.load_image import show_image,load_image2numpy
+from utils.load_image import show_image,load_image2numpy
 from scipy import interpolate
 import random
 
