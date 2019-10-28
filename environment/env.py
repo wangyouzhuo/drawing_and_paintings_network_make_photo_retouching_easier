@@ -27,6 +27,8 @@ class Environment(object):
         self.action_trajectory = []
         self.done = False
 
+        self.distance = None
+
         self.gray_action_list = gray_action_list
         self.hue_action_list = hue_action_list
         self.saturation_action_list = saturation_action_list
@@ -48,12 +50,16 @@ class Environment(object):
         for name in self.dirty_name_list:
             index = name[0:name.find('_')]
             if index == index_str:
-                dirty_name = name
+                dirty_name = index
                 break
+        dirty_name = dirty_name+"_a.jpg"
+        # print("dirty_name:%s  target_name:%s"%(dirty_name,target_name ))
+        # print("dirty_path:%s  target_path:%s"%(self.dirty_path,self.target_path ))
         self.dirty_image = load_image2numpy(self.dirty_path+dirty_name) # 脏数据
         self.target_image = load_image2numpy(self.target_path+target_name) # 干净数据
         self.current_image = self.dirty_image
         self.l2_distance_old = compute_color_l2(current_image=self.dirty_image,target_image=self.target_image)
+        self.distance = None
         self.action_trajectory = []
         self.done = False
         # result = np.clip(self.current_image*255.0,a_min=0.0,a_max=255.0).astype(np.uint8)
@@ -66,6 +72,7 @@ class Environment(object):
         new_l2_distance = compute_color_l2(current_image=result, target_image=self.target_image)
         reward = self.l2_distance_old - new_l2_distance
         self.l2_distance_old = new_l2_distance
+        self.distance = new_l2_distance
         self.current_image = result
         #print("sub_distance: ",new_l2_distance)
         if new_l2_distance < TERMINAL_THRESHOLD:
@@ -80,6 +87,7 @@ class Environment(object):
         new_l2_distance = compute_color_l2(current_image=result, target_image=self.target_image)
         reward = self.l2_distance_old - new_l2_distance
         self.l2_distance_old = new_l2_distance
+        self.distance = new_l2_distance
         self.current_image = result
         #print("master_distance: ",new_l2_distance)
         if new_l2_distance < TERMINAL_THRESHOLD:
@@ -95,6 +103,8 @@ class Environment(object):
         reward = self.l2_distance_old - new_l2_distance
 
         self.l2_distance_old = new_l2_distance
+        self.distance = new_l2_distance
+
         self.current_image = result
         if new_l2_distance < TERMINAL_THRESHOLD:
             self.done = True

@@ -1,8 +1,8 @@
-from train.train import *
-import tensorflow as tf
-from train.model import *
+# from train.train import *
+# import tensorflow as tf
+# from train.model import *
 import threading
-from constant.constant import *
+#from constant.constant import *
 from train.work_demo import *
 from constant.params import *
 from utils.global_count import _init_train_count,_init_reward_list,_init_trajectory_dict
@@ -40,15 +40,19 @@ if __name__ == "__main__":
                     a_dim=4,LR_A=LR_A,LR_C=LR_A,devcie=device,global_AC=None,function='master')
 
         GLOBAL_SUB = []
+
         GLOBAL_SUB.append(A3C_Net(type='global',name='Global_Sub', sess=SESS,
                     dim_color_feature=dim_color_hist,dim_vgg_feature=dim_image_feature,dim_gray_feature=dim_gray_hist,
                     a_dim=dim_sub_action[0],LR_A=LR_A,LR_C=LR_A,devcie=device,global_AC=None,function='sub_gray'))
+
         GLOBAL_SUB.append(A3C_Net(type='global',name='Global_Sub', sess=SESS,
                     dim_color_feature=dim_color_hist,dim_vgg_feature=dim_image_feature,dim_gray_feature=dim_gray_hist,
                     a_dim=dim_sub_action[1],LR_A=LR_A,LR_C=LR_A,devcie=device,global_AC=None,function='sub_hue'))
+
         GLOBAL_SUB.append(A3C_Net(type='global',name='Global_Sub', sess=SESS,
                     dim_color_feature=dim_color_hist,dim_vgg_feature=dim_image_feature,dim_gray_feature=dim_gray_hist,
                     a_dim=dim_sub_action[2],LR_A=LR_A,LR_C=LR_A,devcie=device,global_AC=None,function='sub_saturation'))
+
         GLOBAL_SUB.append(A3C_Net(type='global',name='Global_Sub', sess=SESS,
                     dim_color_feature=dim_color_hist,dim_vgg_feature=dim_image_feature,dim_gray_feature=dim_gray_hist,
                     a_dim=dim_sub_action[3],LR_A=LR_A,LR_C=LR_A,devcie=device,global_AC=None,function='sub_whitebalance'))

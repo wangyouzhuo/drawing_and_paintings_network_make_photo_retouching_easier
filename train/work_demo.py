@@ -126,9 +126,9 @@ class AC_Worker(object):
                     if done:
                         v_next_master = 0
                     else:
-                        v_next_master = self.Master_net.get_value(color_feature = start_color_feature,
-                                                                  gray_feature  = start_gray_feature,
-                                                                  s_image       = start_s_image)
+                        v_next_master = self.Master_net.get_value(color_feature = end_color_feature,
+                                                                  gray_feature  = end_gray_feature,
+                                                                  s_image       = end_s_image)
                     q_master = sum(master_reward) + GAMMA*v_next_master
                     buffer_s_image_for_master       = [start_s_image]
                     buffer_gray_feature_for_master  = [start_gray_feature]
@@ -151,8 +151,8 @@ class AC_Worker(object):
                     count = 0
                 if done or steps>=MAX_STEPS_IN_EPISODE:
                     _append_reward_list(ep_r)
-                    print("Epi:%6s || Success:%5s || Steps:%3s || ep_r:%6s || Img::%8s" % (EP_COUNT,
-                    done, steps, round(ep_r, 3), self.env.img_name))
+                    print("Epi:%6s || Success:%5s || Steps:%3s || ep_r:%12s || Img::%8s || End_distance:%s" %
+                        (EP_COUNT,done, steps, round(ep_r, 3), self.env.img_name , self.env.distance))
                     _add_train_count()
                     if done is False:
                         #self.env.save_env_image(success=False,epi=EP_COUNT)
