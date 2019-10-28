@@ -78,6 +78,7 @@ class AC_Worker(object):
                 # take the sampled sub_action
                 s_image_next, color_feature_next, gray_feature_next, r, done \
                     = self.env.take_action(action_index = a,policy_index = sub_policy_index )
+                r = r/1000.0
                 master_reward.append(r)
                 steps = steps + 1
                 ep_r = ep_r + r
